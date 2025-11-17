@@ -1,0 +1,12 @@
+
+model BillProduct {
+  id        String   @id @default(uuid())
+  billId    String
+  name      String
+  quantity  Int
+  rate      Float   // store snapshot of rate at billing time
+
+  bill      Bill     @relation(fields: [billId], references: [id], onDelete: Cascade)
+
+  @@index([billId])
+}

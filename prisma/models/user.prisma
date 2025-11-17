@@ -1,0 +1,39 @@
+enum UserRole {
+  ADMIN
+  USER
+  MANAGER
+  SUPERADMIN
+}
+
+model User {
+  // Primary Key
+  id                            String    @id @default(uuid())
+
+  // Authentication
+  email                         String    @unique @db.VarChar(255)
+  password                      String    @db.VarChar(255)
+
+  // Personal Information
+  name                     String    
+
+  // Contact Information
+  phoneNumber                   String?   @unique
+
+  // Role & Permissions
+  role                          UserRole  @default(USER)
+  permissions                   String[]
+
+  isActive                      Boolean   @default(true)
+  isEmailVerified               Boolean   @default(false)
+
+  // Timestamps
+  createdAt                     DateTime  @default(now())
+  updatedAt                     DateTime  @updatedAt
+
+  // Relationships
+  clients                       Client[]
+
+  @@index([email])
+  @@index([role])
+  @@index([createdAt])
+}
