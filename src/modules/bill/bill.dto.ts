@@ -1,100 +1,186 @@
+import { PartialType } from '@nestjs/mapped-types';
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Patch,
-  Delete,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-import { BillService } from './bill.service';
-import { CreateBillDto, CustomFilterDto, FindAllBillQueryDto, FindAllBillResultDto, UpdateBillDto } from './bill.dto';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiQuery,
-  ApiBody,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
-import { Bill } from 'src/entity/bill.entity';
-import { JwtUserAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { User } from 'src/entity/user.entity';
-import { GetUser } from '../auth/decorator/get-user.decorator';
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsEnum,
+  IsDateString,
+  IsUUID,
+  ValidateNested,
+  IsArray,
+  Min,
+} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Bill, BillStatus } from 'src/entity/bill.entity';
+import { Type } from 'class-transformer';
 
-@ApiTags('Bills')
-@ApiBearerAuth()
-@UseGuards(JwtUserAuthGuard)
-@Controller('bills')
-export class BillController {
-  constructor(private readonly billService: BillService) {}
+// ---------------- BILL PRODUCT DTO ----------------
+export class BillProductItemDto {
+  @ApiProperty({
+    example: 'USB-C Charger',
+    description: 'Product name snapshot',
+  })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 
-  @Post()
-  @ApiOperation({ summary: 'Create a new bill' })
-  @ApiResponse({
-    status: 201,
-    description: 'Bill created successfully',
-    type: Bill,
+  @ApiProperty({
+    example: 2,
+    description: 'Quantity of the product',
   })
-  create(@Body() dto: CreateBillDto) {
-    return this.billService.create(dto);
-  }
+  @IsNumber()
+  @Min(1)
+  quantity: number;
 
-  @Post('/paginate')
-  @ApiOperation({
-    summary: 'Retrieve paginated bills with optional filters and search',
+  @ApiProperty({
+    example: 499.99,
+    description: 'Rate snapshot at billing time',
   })
-  @ApiQuery({
-    name: 'search',
-    required: false,
-    description: 'Search bills by client name or bill number',
-  })
-  @ApiBody({
-    type: CustomFilterDto,
-    description: 'Optional date filter for bills',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'List of bills matching filters',
-    type: FindAllBillResultDto,
-  })
-  findAll(
-    @GetUser() user:User,
-    @Query() query?: FindAllBillQueryDto,
-    @Body() customFilterDto?: CustomFilterDto,
-  ) {
-    return this.billService.findAll(user.id,customFilterDto, query);
-  }
+  @IsNumber()
+  rate: number;
+}
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Retrieve a bill by its ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Bill found successfully',
-    type: Bill,
-  })
-  @ApiResponse({ status: 404, description: 'Bill not found' })
-  findOne(@Param("clientId") clientId:string,@Param('id') id: string) {
-    return this.billService.findOne(clientId,id);
-  }
+// ---------------- CREATE BILL DTO ----------------
+export class CreateBillDto {
+  @ApiProperty({ example: 'uuid-of-client' })
+  @IsUUID()
+  clientId: string;
 
-  @Patch(':id')
-  @ApiOperation({ summary: 'Update a bill by ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Bill updated successfully',
-    type: Bill,
-  })
-  update(@GetUser() user:User,@Param('id') id: string, @Body() dto: UpdateBillDto) {
-    return this.billService.update(user.id,id, dto);
-  }
+  @ApiProperty({ example: 'INV-2025-001' })
+  @IsString()
+  billNumber: string;
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete a bill by ID' })
-  @ApiResponse({ status: 200, description: 'Bill deleted successfully' })
-  remove(@Param("clientId") clientId:string,@Param('id') id: string) {
-    return this.billService.remove(clientId,id);
-  }
+  @ApiProperty({ example: 4500.75 })
+  @IsNumber()
+  total: number;
+
+  @ApiPropertyOptional({ enum: BillStatus })
+  @IsEnum(BillStatus)
+  @IsOptional()
+  status?: BillStatus;
+
+  @ApiPropertyOptional({ example: '2025-11-10' })
+  @IsDateString()
+  @IsOptional()
+  billDate?: string;
+
+  @ApiPropertyOptional({ example: 'Payment due in 15 days' })
+  @IsString()
+  @IsOptional()
+  notes?: string;
+
+  @ApiProperty({
+    type: [BillProductItemDto],
+    description: 'Bill product list',
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => BillProductItemDto)
+  products: BillProductItemDto[];
+}
+
+// ---------------- UPDATE BILL DTO ----------------
+export class UpdateBillDto {
+  @ApiPropertyOptional({ example: 'uuid-of-client' })
+  @IsUUID()
+  @IsOptional()
+  clientId: string;
+
+  @ApiProperty({ example: 4500.75 })
+  @IsNumber()
+  total: number;
+
+  @ApiPropertyOptional({ enum: BillStatus })
+  @IsEnum(BillStatus)
+  @IsOptional()
+  status?: BillStatus;
+
+  @ApiPropertyOptional({ example: '2025-11-10' })
+  @IsDateString()
+  @IsOptional()
+  billDate?: string;
+
+  @ApiPropertyOptional({ example: 'Payment due in 15 days' })
+  @IsString()
+  @IsOptional()
+  notes?: string;
+
+  @ApiPropertyOptional({
+    type: [BillProductItemDto],
+    description: 'Bill product list',
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => BillProductItemDto)
+  @IsOptional()
+  products: BillProductItemDto[];
+}
+
+// Custom filter DTO for pagination/filtering
+export class CustomFilterDto {
+  @ApiPropertyOptional({
+    example: '2025-01-01',
+    description: 'Filter bills from this date (inclusive)',
+  })
+  @IsDateString()
+  @IsOptional()
+  fromDate?: string;
+
+  @ApiPropertyOptional({
+    example: '2025-12-31',
+    description: 'Filter bills up to this date (inclusive)',
+  })
+  @IsDateString()
+  @IsOptional()
+  toDate?: string;
+}
+
+
+export class FindAllBillQueryDto {
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Page number for pagination',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  page?: number;
+
+  @ApiPropertyOptional({
+    example: 10,
+    description: 'Number of items per page',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  limit?: number;
+
+  @ApiPropertyOptional({
+    example: 'John Doe',
+    description: 'Search by client name or bill number',
+  })
+  @IsString()
+  @IsOptional()
+  search?: string;
+}
+
+export class FindAllBillResultDto {
+  @ApiProperty({
+    description: 'Total number of bills matching the criteria',
+    example: 50,
+  })
+  total: number;
+
+  @ApiProperty({
+    description: 'List of bills for the current page',
+    type: [CreateBillDto],
+  })
+  data: Bill[];
+
+  @ApiProperty({
+    description: 'Total number of pages available',
+    example: 50,
+  })
+  taotalPages: number;
 }
