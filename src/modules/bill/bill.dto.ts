@@ -12,7 +12,7 @@ import {
   Min,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { BillStatus } from 'src/entity/bill.entity';
+import { Bill, BillStatus } from 'src/entity/bill.entity';
 import { Type } from 'class-transformer';
 
 // ---------------- BILL PRODUCT DTO ----------------
@@ -134,4 +134,53 @@ export class CustomFilterDto {
   @IsDateString()
   @IsOptional()
   toDate?: string;
+}
+
+
+export class FindAllBillQueryDto {
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Page number for pagination',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  page?: number;
+
+  @ApiPropertyOptional({
+    example: 10,
+    description: 'Number of items per page',
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  limit?: number;
+
+  @ApiPropertyOptional({
+    example: 'John Doe',
+    description: 'Search by client name or bill number',
+  })
+  @IsString()
+  @IsOptional()
+  search?: string;
+}
+
+export class FindAllBillResultDto {
+  @ApiProperty({
+    description: 'Total number of bills matching the criteria',
+    example: 50,
+  })
+  total: number;
+
+  @ApiProperty({
+    description: 'List of bills for the current page',
+    type: [CreateBillDto],
+  })
+  data: Bill[];
+
+  @ApiProperty({
+    description: 'Total number of pages available',
+    example: 2,
+  })
+  taotalPages: number;
 }
