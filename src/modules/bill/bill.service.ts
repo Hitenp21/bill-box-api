@@ -2,7 +2,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBillDto, CustomFilterDto, UpdateBillDto } from './bill.dto';
-import { BillStatus } from '@prisma/client';
 
 @Injectable()
 export class BillService {
@@ -141,7 +140,7 @@ export class BillService {
         total: true,
       },
       where: {
-        status: BillStatus.PAID,
+        status: "PAID",
         client: { userId },
       },
     });
@@ -155,7 +154,7 @@ export class BillService {
         total: true,
       },
       where: {
-        status: BillStatus.UNPAID,
+        status: "UNPAID",
         client: { userId },
       },
     });
@@ -172,7 +171,7 @@ export class BillService {
       _sum: { total: true },
       where: {
         client: { userId },
-        status: BillStatus.PAID,
+        status: "PAID",
         ...(startDate && endDate
           ? {
               billDate: {
@@ -189,7 +188,7 @@ export class BillService {
       _sum: { total: true },
       where: {
         client: { userId },
-        status: BillStatus.UNPAID,
+        status: "UNPAID",
         ...(startDate && endDate
           ? {
               billDate: {
