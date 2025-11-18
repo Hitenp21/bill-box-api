@@ -62,9 +62,6 @@ export class UserService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    if (updateUserDto.password) {
-      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
-    }
     return this.prisma.user.update({
       where: { id },
       data: updateUserDto,
@@ -75,3 +72,4 @@ export class UserService {
     return this.prisma.user.delete({ where: { id } });
   }
 }
+
