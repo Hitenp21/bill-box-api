@@ -1,7 +1,8 @@
 // src/bill/bill.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateBillDto, CustomFilterDto, UpdateBillDto } from './bill.dto';
+import { CreateBillDto, CustomFilterDto, FindAllBillQueryDto, UpdateBillDto } from './bill.dto';
+import { BillStatus } from '@prisma/client';
 
 @Injectable()
 export class BillService {
@@ -34,7 +35,15 @@ export class BillService {
     });
   }
 
-  async findAll(userId:string,customFilterDto?: CustomFilterDto, search?: string) {
+  async findAll(userId:string,customFilterDto?: CustomFilterDto, query?: FindAllBillQueryDto) {
+    let { search , page, limit } = query || {};
+
+    if(!page){
+      page = 1;
+    }
+    if(!limit){
+      limit = 10;
+    }
     const filters: any = {};
     const { fromDate, toDate } = customFilterDto || {};
 
@@ -60,7 +69,10 @@ export class BillService {
         }
       : {};
 
-    const bills = await this.prisma.bill.findMany({
+    const [bills, total ] = await Promise.all([
+      this.prisma.bill.findMany({
+      skip:(page - 1) * limit,
+      take: limit,
       where: {
         client:{
           userId,
@@ -73,8 +85,19 @@ export class BillService {
         products: true,
       },
       orderBy: { createdAt: 'desc' },
-    });
-    return bills;
+    }),
+      this.prisma.bill.count({
+        where: {
+          client:{
+            userId,
+          },
+          ...filters,
+          ...searchFilter,
+        },
+      })
+    ]); 
+
+    return {data: bills , total , totalPages: Math.ceil(total / limit)};
   }
 
   async findOne(userId:string,id: string) {
@@ -140,7 +163,7 @@ export class BillService {
         total: true,
       },
       where: {
-        status: "PAID",
+        status: BillStatus.PAID,
         client: { userId },
       },
     });
@@ -154,7 +177,7 @@ export class BillService {
         total: true,
       },
       where: {
-        status: "UNPAID",
+        status: BillStatus.UNPAID,
         client: { userId },
       },
     });
@@ -171,7 +194,7 @@ export class BillService {
       _sum: { total: true },
       where: {
         client: { userId },
-        status: "PAID",
+        status: BillStatus.PAID,
         ...(startDate && endDate
           ? {
               billDate: {
@@ -188,7 +211,7 @@ export class BillService {
       _sum: { total: true },
       where: {
         client: { userId },
-        status: "UNPAID",
+        status: BillStatus.UNPAID,
         ...(startDate && endDate
           ? {
               billDate: {
