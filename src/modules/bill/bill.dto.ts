@@ -12,10 +12,10 @@ import {
   Min,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Bill, BillStatus } from 'src/entity/bill.entity';
+import { Bill } from 'src/entity/bill.entity';
 import { Type } from 'class-transformer';
 
-enum BillStatus  {
+export enum BillStatus  {
   PAID = "PAID",
   UNPAID = "UNPAID",
   OVERDUE = "OVERDUE",
