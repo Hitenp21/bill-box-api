@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { BillService } from './bill.service';
-import { CreateBillDto, CustomFilterDto, UpdateBillDto } from './bill.dto';
+import { CreateBillDto, CustomFilterDto, FindAllBillQueryDto, FindAllBillResultDto, UpdateBillDto } from './bill.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -58,14 +58,14 @@ export class BillController {
   @ApiResponse({
     status: 200,
     description: 'List of bills matching filters',
-    type: [Bill],
+    type: FindAllBillResultDto,
   })
   findAll(
     @GetUser() user:User,
-    @Query('search') search?: string,
+    @Query() query?: FindAllBillQueryDto,
     @Body() customFilterDto?: CustomFilterDto,
   ) {
-    return this.billService.findAll(user.id,customFilterDto, search);
+    return this.billService.findAll(user.id,customFilterDto, query);
   }
 
   @Get(':id')
