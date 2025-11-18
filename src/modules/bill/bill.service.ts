@@ -1,8 +1,7 @@
 // src/bill/bill.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateBillDto, CustomFilterDto, FindAllBillQueryDto, UpdateBillDto } from './bill.dto';
-import { BillStatus } from '@prisma/client';
+import { BillStatus, CreateBillDto, CustomFilterDto, FindAllBillQueryDto, UpdateBillDto } from './bill.dto';
 
 @Injectable()
 export class BillService {
