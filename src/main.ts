@@ -30,12 +30,13 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
 
   // Correct usage of @scalar/nestjs-api-reference
-  app.use(
-    '/docs',
-    apiReference({
-      content: document,
-    }),
-  );
+  // app.use(
+  //   '/docs',
+  //   apiReference({
+  //     content: document,
+  //   }),
+  // );
+  SwaggerModule.setup('swagger', app, document);
 
   // Get the configuration service from the application
   const configService = app.get(ConfigService);
