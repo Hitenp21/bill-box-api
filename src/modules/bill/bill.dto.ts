@@ -14,6 +14,7 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Bill, BillStatus } from 'src/entity/bill.entity';
 import { Type } from 'class-transformer';
+import { BillStatus } from '@prisma/client';
 
 // ---------------- BILL PRODUCT DTO ----------------
 export class BillProductItemDto {
