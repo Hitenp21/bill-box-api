@@ -55,11 +55,11 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
-  @Patch(':id')
+  @Patch('me')
   @ApiOperation({ summary: 'Update user details by ID' })
   @ApiResponse({ status: 200, description: 'User updated successfully', type: User })
-  update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
-    return this.userService.update(id, dto);
+  update(@GetUser() user:User, @Body() dto: UpdateUserDto) {
+    return this.userService.update(user.id, dto);
   }
 
   @Delete(':id')
@@ -69,3 +69,4 @@ export class UserController {
     return this.userService.remove(id);
   }
 }
+
