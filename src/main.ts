@@ -10,7 +10,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: [
-      "https://sales-summit-io.vercel.app"
+      "https://sales-summit-io.vercel.app/"
     ],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     allowedHeaders: "Content-Type, Authorization",
