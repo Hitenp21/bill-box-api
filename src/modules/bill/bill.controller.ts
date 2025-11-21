@@ -94,7 +94,7 @@ export class BillController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a bill by ID' })
   @ApiResponse({ status: 200, description: 'Bill deleted successfully' })
-  remove(@Param("clientId") clientId:string,@Param('id') id: string) {
-    return this.billService.remove(clientId,id);
+  remove(@Param('id') id: string) {
+    return this.billService.remove(id);
   }
 }
