@@ -231,7 +231,7 @@ export class BillService {
 }
 
 
-  async remove(clientId:string,id: string) {
-    return this.prisma.bill.delete({ where: {clientId, id } });
+  async remove(id: string) {
+    return this.prisma.bill.delete({ where: { id } });
   }
 }
