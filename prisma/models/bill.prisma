@@ -1,18 +1,20 @@
 model Bill {
-  id          String      @id @default(uuid())
-  billNumber  String      @unique
-  clientId      String
-  client        Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  total       Float
-  status      BillStatus  @default(UNPAID)
-  products    BillProduct[]
+  id           String        @id @default(uuid())
+  billNumber   String        @unique
+  clientId     String
+  client       Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  total        Float
+  status       BillStatus    @default(UNPAID)
+  products     BillProduct[]
   billDate     DateTime?
-  notes       String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  notes        String?
+  isSampleBill Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
-  @@map("bills")
   @@index([clientId])
+  @@index([isSampleBill])
+  @@map("bills")
 }
 
 enum BillStatus {

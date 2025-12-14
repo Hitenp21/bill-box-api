@@ -10,6 +10,7 @@ import {
   ValidateNested,
   IsArray,
   Min,
+  IsBoolean,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Bill } from 'src/entity/bill.entity';
@@ -54,9 +55,10 @@ export class CreateBillDto {
   @IsUUID()
   clientId: string;
 
-  @ApiProperty({ example: 'INV-2025-001' })
+  @ApiPropertyOptional({ example: 'INV-2025-001' })
   @IsString()
-  billNumber: string;
+  @IsOptional()
+  billNumber?: string;
 
   @ApiProperty({ example: 4500.75 })
   @IsNumber()
@@ -76,6 +78,15 @@ export class CreateBillDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @ApiPropertyOptional({
+    example: false,
+    description: 'Flag to mark this as a sample bill',
+    default: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isSampleBill?: boolean;
 
   @ApiProperty({
     type: [BillProductItemDto],
@@ -112,6 +123,14 @@ export class UpdateBillDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @ApiPropertyOptional({
+    example: false,
+    description: 'Flag to mark this as a sample bill',
+  })
+  @IsBoolean()
+  @IsOptional()
+  isSampleBill?: boolean;
 
   @ApiPropertyOptional({
     type: [BillProductItemDto],
@@ -170,6 +189,15 @@ export class FindAllBillQueryDto {
   @IsString()
   @IsOptional()
   search?: string;
+
+  @ApiPropertyOptional({
+    enum: BillStatus,
+    example: BillStatus.PAID,
+    description: 'Filter bills by status',
+  })
+  @IsEnum(BillStatus)
+  @IsOptional()
+  status?: BillStatus;
 }
 
 export class FindAllBillResultDto {

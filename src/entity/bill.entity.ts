@@ -46,6 +46,13 @@ export class Bill {
   })
   notes?: string;
 
+  @ApiProperty({
+    example: false,
+    description: 'Flag indicating if this is a sample bill',
+    default: false,
+  })
+  isSampleBill: boolean;
+
   @ApiProperty({ example: '2025-11-10T10:00:00Z' })
   createdAt: Date;
 

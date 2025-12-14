@@ -16,13 +16,18 @@ import { Client } from 'src/entity/client.entity';
 import { JwtUserAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { User } from 'src/entity/user.entity';
+import { BillService } from '../bill/bill.service';
+import { Bill } from 'src/entity/bill.entity';
 
 @ApiTags('Clients')
 @ApiBearerAuth()
 @UseGuards(JwtUserAuthGuard)
 @Controller('clients')
 export class ClientController {
-  constructor(private readonly clientService: ClientService) {}
+  constructor(
+    private readonly clientService: ClientService,
+    private readonly billService: BillService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new client' })
@@ -53,6 +58,29 @@ export class ClientController {
   @ApiResponse({ status: 404, description: 'Client not found' })
   findOne(@GetUser() user:User,@Param('id') id: string) {
     return this.clientService.findOne(user.id,id);
+  }
+
+  @Get(':id/bills')
+  @ApiOperation({ summary: 'Get all bills for a specific client' })
+  @ApiResponse({ status: 200, description: 'List of bills for the client', type: [Bill] })
+  @ApiResponse({ status: 404, description: 'Client not found' })
+  getClientBills(@GetUser() user: User, @Param('id') clientId: string) {
+    return this.billService.findByClientId(user.id, clientId);
+  }
+
+  @Get(':id/sample-bill')
+  @ApiOperation({ 
+    summary: 'Get the sample bill for a specific client',
+    description: 'Returns the sample bill for the client (only one sample bill exists per client). Returns null if no sample bill exists.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Sample bill for the client (or null if not found)', 
+    type: Bill 
+  })
+  @ApiResponse({ status: 404, description: 'Client not found' })
+  getClientSampleBill(@GetUser() user: User, @Param('id') clientId: string) {
+    return this.billService.findSampleBillByClient(user.id, clientId);
   }
 
   @Patch(':id')

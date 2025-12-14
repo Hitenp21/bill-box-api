@@ -32,7 +32,10 @@ export class BillController {
   constructor(private readonly billService: BillService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new bill' })
+  @ApiOperation({ 
+    summary: 'Create a new bill',
+    description: 'Create a new bill. If isSampleBill is set to true, any existing sample bill for that client will be automatically unset to ensure only one sample bill exists per client.'
+  })
   @ApiResponse({
     status: 201,
     description: 'Bill created successfully',
@@ -51,6 +54,12 @@ export class BillController {
     required: false,
     description: 'Search bills by client name or bill number',
   })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['PAID', 'UNPAID', 'OVERDUE', 'CANCELLED'],
+    description: 'Filter bills by status',
+  })
   @ApiBody({
     type: CustomFilterDto,
     description: 'Optional date filter for bills',
@@ -68,6 +77,20 @@ export class BillController {
     return this.billService.findAll(user.id,customFilterDto, query);
   }
 
+  @Get('samples')
+  @ApiOperation({ 
+    summary: 'Retrieve all sample bills for the authenticated user',
+    description: 'Returns all sample bills for the user (one per client). Returns empty array if no sample bills exist.'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of sample bills (one per client)',
+    type: [Bill],
+  })
+  findSampleBills(@GetUser() user: User) {
+    return this.billService.findSampleBills(user.id);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Retrieve a bill by its ID' })
   @ApiResponse({
@@ -76,17 +99,21 @@ export class BillController {
     type: Bill,
   })
   @ApiResponse({ status: 404, description: 'Bill not found' })
-  findOne(@Param("clientId") clientId:string,@Param('id') id: string) {
-    return this.billService.findOne(clientId,id);
+  findOne(@GetUser() user: User, @Param('id') id: string) {
+    return this.billService.findOne(user.id, id);
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update a bill by ID' })
+  @ApiOperation({ 
+    summary: 'Update a bill by ID',
+    description: 'Update a bill including sample bills. You can update all fields including isSampleBill flag. If setting isSampleBill to true, any existing sample bill for that client will be automatically unset to ensure only one sample bill exists per client.'
+  })
   @ApiResponse({
     status: 200,
     description: 'Bill updated successfully',
     type: Bill,
   })
+  @ApiResponse({ status: 404, description: 'Bill not found' })
   update(@GetUser() user:User,@Param('id') id: string, @Body() dto: UpdateBillDto) {
     return this.billService.update(user.id,id, dto);
   }

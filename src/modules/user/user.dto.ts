@@ -24,6 +24,11 @@ export class CreateUserDto {
   @IsNotEmpty()
   name: string;
 
+  @ApiPropertyOptional({ example: 'Acme Corporation', description: 'Company name of the user' })
+  @IsOptional()
+  @IsString()
+  companyName?: string;
+
   @ApiPropertyOptional({ example: '+919876543210', description: 'Phone number of the user' })
   @IsOptional()
   @IsString()
@@ -49,6 +54,11 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   name: string;
+
+  @ApiPropertyOptional({ example: 'Acme Corporation', description: 'Company name of the user' })
+  @IsOptional()
+  @IsString()
+  companyName?: string;
 
   @ApiPropertyOptional({ example: '+919876543210', description: 'Phone number of the user' })
   @IsOptional()

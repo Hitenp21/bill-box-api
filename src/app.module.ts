@@ -14,6 +14,7 @@ import { configuration } from './config';
 import { DashboardService } from './modules/dashboard/dashboard.service';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { BillProductModule } from './modules/bill-product/bill-product.module';
+import { ProductModule } from './modules/product/product.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { BillProductModule } from './modules/bill-product/bill-product.module';
     AuthModule,
     DashboardModule,
     BillProductModule,
+    ProductModule,
   ],
   controllers: [AppController],
   providers: [AppService, BillService, ClientService,UserService, PrismaService, DashboardService],

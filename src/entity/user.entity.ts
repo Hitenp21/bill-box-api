@@ -28,6 +28,12 @@ export class User {
   name: string;
 
   @ApiPropertyOptional({
+    example: 'Acme Corporation',
+    description: 'Company name of the user',
+  })
+  companyName?: string;
+
+  @ApiPropertyOptional({
     example: '+919876543210',
     description: 'User phone number',
   })
