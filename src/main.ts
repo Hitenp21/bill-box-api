@@ -8,10 +8,29 @@ import { apiReference } from '@scalar/nestjs-api-reference';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
- app.enableCors({
-  origin: true, // reflects the request origin (dangerous in some cases)
-  credentials: true,
-});
+  // Get the configuration service from the application
+  const configService = app.get(ConfigService);
+
+  // Configure CORS
+  const frontendUrl = "https://sales-summit-io.vercel.app";
+  app.enableCors({
+    origin: frontendUrl || true, // Use FRONTEND_URL from env or allow all origins
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+      'Access-Control-Allow-Origin',
+      'Access-Control-Allow-Headers',
+      'Access-Control-Allow-Methods',
+    ],
+    exposedHeaders: ['Authorization'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  });
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
@@ -25,16 +44,13 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
 
   // Correct usage of @scalar/nestjs-api-reference
-  app.use(
-    '/docs',
-    apiReference({
-      content: document,
-    }),
-  );
+  // app.use(
+  //   '/docs',
+  //   apiReference({
+  //     content: document,
+  //   }),
+  // );
   SwaggerModule.setup('swagger', app, document);
-
-  // Get the configuration service from the application
-  const configService = app.get(ConfigService);
 
   // Get the port number from the configuration
   const port = configService.get<number>('port') || 3009;
