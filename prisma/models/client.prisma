@@ -1,8 +1,8 @@
 model Client {
   id          String  @id @default(uuid())
-  email       String  @unique
+  email       String
   name        String
-  phoneNumber String? @unique
+  phoneNumber String?
   bills       Bill[]
   userId      String  @map("user_id")
 
@@ -13,5 +13,7 @@ model Client {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+  @@unique([email, userId])
+  @@unique([phoneNumber, userId])
   @@map("clients")
 }

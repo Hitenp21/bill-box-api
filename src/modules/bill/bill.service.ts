@@ -120,6 +120,7 @@ export class BillService {
         client:{
           userId,
         },
+        isSampleBill: false,
         ...filters,
         ...searchFilter,
       },
@@ -134,6 +135,7 @@ export class BillService {
           client:{
             userId,
           },
+          isSampleBill: false,
           ...filters,
           ...searchFilter,
         },
@@ -142,6 +144,90 @@ export class BillService {
 
     return {data: bills , total , totalPages: Math.ceil(total / limit)};
   }
+
+  async clientBills(userId: string, clientId: string, customFilterDto?: CustomFilterDto, query?: FindAllBillQueryDto) {
+    let { page, limit, status } = query || {};
+
+    if(!page){
+      page = 1;
+    }
+    if(!limit){
+      limit = 10;
+    }
+    const filters: any = {};
+    const { fromDate, toDate } = customFilterDto || {};
+    
+    // Date filter handling
+    if (fromDate && toDate) {
+      filters.billDate = {
+        gte: new Date(fromDate),
+        lte: new Date(toDate),
+      };
+    } else if (fromDate) {
+      filters.billDate = { gte: new Date(fromDate) };
+    } else if (toDate) {
+      filters.billDate = { lte: new Date(toDate) };
+    }
+    
+    // Status filter
+    if (status) {
+      filters.status = status;
+    } 
+
+    const [bills, total ] = await Promise.all([
+      this.prisma.bill.findMany({
+      skip:(page - 1) * limit,
+      take: limit,
+      where: {
+        client:{
+          id: clientId,
+          userId,
+        },
+        isSampleBill: false,
+        ...filters,
+      },
+      select:{
+        id:true,
+        billNumber:true,
+        billDate:true,
+        total:true,
+        status:true,
+        isSampleBill:true,
+        createdAt:true, 
+        updatedAt:true,
+        client:{
+          select:{
+            id:true,
+            name:true,
+            email:true,
+            phoneNumber:true,
+            user:{
+              select:{
+                id:true,
+                name:true,
+                companyName:true,
+                email:true,
+                phoneNumber:true,
+              }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
+      this.prisma.bill.count({
+        where: {
+          client:{
+            id: clientId,
+            userId,
+          },
+          isSampleBill: false,
+          ...filters,
+        },
+      })
+    ]);
+    return {data: bills , total , totalPages: Math.ceil(total / limit)};
+  } 
 
   async findOne(userId: string, id: string) {
     const bill = await this.prisma.bill.findFirst({

@@ -216,18 +216,20 @@ export type ClientOrderByWithRelationInput = {
 
 export type ClientWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  email?: string
-  phoneNumber?: string
+  email_userId?: Prisma.ClientEmailUserIdCompoundUniqueInput
+  phoneNumber_userId?: Prisma.ClientPhoneNumberUserIdCompoundUniqueInput
   AND?: Prisma.ClientWhereInput | Prisma.ClientWhereInput[]
   OR?: Prisma.ClientWhereInput[]
   NOT?: Prisma.ClientWhereInput | Prisma.ClientWhereInput[]
+  email?: Prisma.StringFilter<"Client"> | string
   name?: Prisma.StringFilter<"Client"> | string
+  phoneNumber?: Prisma.StringNullableFilter<"Client"> | string | null
   userId?: Prisma.StringFilter<"Client"> | string
   createdAt?: Prisma.DateTimeFilter<"Client"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Client"> | Date | string
   bills?: Prisma.BillListRelationFilter
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-}, "id" | "email" | "phoneNumber">
+}, "id" | "email_userId" | "phoneNumber_userId">
 
 export type ClientOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -331,6 +333,16 @@ export type ClientUncheckedUpdateManyInput = {
 export type ClientScalarRelationFilter = {
   is?: Prisma.ClientWhereInput
   isNot?: Prisma.ClientWhereInput
+}
+
+export type ClientEmailUserIdCompoundUniqueInput = {
+  email: string
+  userId: string
+}
+
+export type ClientPhoneNumberUserIdCompoundUniqueInput = {
+  phoneNumber: string
+  userId: string
 }
 
 export type ClientCountOrderByAggregateInput = {

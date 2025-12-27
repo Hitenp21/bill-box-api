@@ -77,6 +77,39 @@ export class BillController {
     return this.billService.findAll(user.id,customFilterDto, query);
   }
 
+  @Post('client/:clientId/bills')
+  @ApiOperation({
+    summary: 'Retrieve paginated bills with optional filters and search',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Search bills by client name or bill number',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['PAID', 'UNPAID', 'OVERDUE', 'CANCELLED'],
+    description: 'Filter bills by status',
+  })
+  @ApiBody({
+    type: CustomFilterDto,
+    description: 'Optional date filter for bills',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of bills matching filters',
+    type: FindAllBillResultDto,
+  })
+  findAllClientBills(
+    @GetUser() user:User,
+    @Param('clientId') clientId: string,
+    @Query() query?: FindAllBillQueryDto,
+    @Body() customFilterDto?: CustomFilterDto,
+  ) {
+    return this.billService.clientBills(user.id, clientId, customFilterDto, query);
+  }
+
   @Get('samples')
   @ApiOperation({ 
     summary: 'Retrieve all sample bills for the authenticated user',
