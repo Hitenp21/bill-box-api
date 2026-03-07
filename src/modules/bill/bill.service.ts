@@ -6,7 +6,7 @@ import { TransactionClient } from 'generated/internal/prismaNamespace';
 
 @Injectable()
 export class BillService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async create(dto: CreateBillDto) {
     return this.prisma.$transaction(async (tx: TransactionClient) => {
@@ -35,7 +35,7 @@ export class BillService {
         const timestamp = Date.now();
         const randomSuffix = Math.random().toString(36).substring(2, 9).toUpperCase();
         billNumber = `BILL-${timestamp}-${randomSuffix}`;
-        
+
         // Ensure uniqueness by checking if it exists
         let exists = await tx.bill.findUnique({ where: { billNumber } });
         let attempts = 0;
@@ -70,16 +70,16 @@ export class BillService {
       });
 
       return bill;
-    });
+    }, { maxWait: 10000, timeout: 20000 });
   }
 
-  async findAll(userId:string,customFilterDto?: CustomFilterDto, query?: FindAllBillQueryDto) {
-    let { search , page, limit, status } = query || {};
+  async findAll(userId: string, customFilterDto?: CustomFilterDto, query?: FindAllBillQueryDto) {
+    let { search, page, limit, status } = query || {};
 
-    if(!page){
+    if (!page) {
       page = 1;
     }
-    if(!limit){
+    if (!limit) {
       limit = 10;
     }
     const filters: any = {};
@@ -105,34 +105,34 @@ export class BillService {
     // Search filter (by bill number or client name)
     const searchFilter = search
       ? {
-          OR: [
-            { billNumber: { contains: search, mode: 'insensitive' } },
-            { client: { name: { contains: search, mode: 'insensitive' } } },
-          ],
-        }
+        OR: [
+          { billNumber: { contains: search, mode: 'insensitive' } },
+          { client: { name: { contains: search, mode: 'insensitive' } } },
+        ],
+      }
       : {};
 
-    const [bills, total ] = await Promise.all([
+    const [bills, total] = await Promise.all([
       this.prisma.bill.findMany({
-      skip:(page - 1) * limit,
-      take: limit,
-      where: {
-        client:{
-          userId,
+        skip: (page - 1) * limit,
+        take: limit,
+        where: {
+          client: {
+            userId,
+          },
+          isSampleBill: false,
+          ...filters,
+          ...searchFilter,
         },
-        isSampleBill: false,
-        ...filters,
-        ...searchFilter,
-      },
-      include: {
-        client: true,
-        products: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    }),
+        include: {
+          client: true,
+          products: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
       this.prisma.bill.count({
         where: {
-          client:{
+          client: {
             userId,
           },
           isSampleBill: false,
@@ -140,23 +140,23 @@ export class BillService {
           ...searchFilter,
         },
       })
-    ]); 
+    ]);
 
-    return {data: bills , total , totalPages: Math.ceil(total / limit)};
+    return { data: bills, total, totalPages: Math.ceil(total / limit) };
   }
 
   async clientBills(userId: string, clientId: string, customFilterDto?: CustomFilterDto, query?: FindAllBillQueryDto) {
     let { page, limit, status } = query || {};
 
-    if(!page){
+    if (!page) {
       page = 1;
     }
-    if(!limit){
+    if (!limit) {
       limit = 10;
     }
     const filters: any = {};
     const { fromDate, toDate } = customFilterDto || {};
-    
+
     // Date filter handling
     if (fromDate && toDate) {
       filters.billDate = {
@@ -168,56 +168,56 @@ export class BillService {
     } else if (toDate) {
       filters.billDate = { lte: new Date(toDate) };
     }
-    
+
     // Status filter
     if (status) {
       filters.status = status;
-    } 
+    }
 
-    const [bills, total ] = await Promise.all([
+    const [bills, total] = await Promise.all([
       this.prisma.bill.findMany({
-      skip:(page - 1) * limit,
-      take: limit,
-      where: {
-        client:{
-          id: clientId,
-          userId,
+        skip: (page - 1) * limit,
+        take: limit,
+        where: {
+          client: {
+            id: clientId,
+            userId,
+          },
+          isSampleBill: false,
+          ...filters,
         },
-        isSampleBill: false,
-        ...filters,
-      },
-      select:{
-        id:true,
-        billNumber:true,
-        billDate:true,
-        total:true,
-        status:true,
-        isSampleBill:true,
-        createdAt:true, 
-        updatedAt:true,
-        client:{
-          select:{
-            id:true,
-            name:true,
-            email:true,
-            phoneNumber:true,
-            user:{
-              select:{
-                id:true,
-                name:true,
-                companyName:true,
-                email:true,
-                phoneNumber:true,
+        select: {
+          id: true,
+          billNumber: true,
+          billDate: true,
+          total: true,
+          status: true,
+          isSampleBill: true,
+          createdAt: true,
+          updatedAt: true,
+          client: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phoneNumber: true,
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  companyName: true,
+                  email: true,
+                  phoneNumber: true,
+                }
               }
             }
           }
-        }
-      },
-      orderBy: { createdAt: 'desc' },
-    }),
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
       this.prisma.bill.count({
         where: {
-          client:{
+          client: {
             id: clientId,
             userId,
           },
@@ -226,8 +226,8 @@ export class BillService {
         },
       })
     ]);
-    return {data: bills , total , totalPages: Math.ceil(total / limit)};
-  } 
+    return { data: bills, total, totalPages: Math.ceil(total / limit) };
+  }
 
   async findOne(userId: string, id: string) {
     const bill = await this.prisma.bill.findFirst({
@@ -319,16 +319,16 @@ export class BillService {
           products: true,
         },
       });
-    });
+    }, { maxWait: 10000, timeout: 20000 });
   }
 
-  async usersTotalBils(userId:string) {
-    return  this.prisma.bill.count({
+  async usersTotalBils(userId: string) {
+    return this.prisma.bill.count({
       where: { client: { userId } },
     });
   }
 
-  async totalErningBills(userId:string){
+  async totalErningBills(userId: string) {
     const totalEarnings = await this.prisma.bill.aggregate({
       _sum: {
         total: true,
@@ -342,7 +342,7 @@ export class BillService {
     return totalEarnings._sum.total || 0;
   }
 
-  async totalDebtsBills(userId:string){
+  async totalDebtsBills(userId: string) {
     const totalEarnings = await this.prisma.bill.aggregate({
       _sum: {
         total: true,
@@ -356,51 +356,51 @@ export class BillService {
     return totalEarnings._sum.total || 0;
   }
 
-  async getFinance(userId:string,startDate?:Date,endDate?:Date) {
+  async getFinance(userId: string, startDate?: Date, endDate?: Date) {
 
-  // Run aggregates in parallel
-  const [earnings, debts] = await Promise.all([
-    // Total earnings (PAID)
-    this.prisma.bill.aggregate({
-      _sum: { total: true },
-      where: {
-        client: { userId },
-        status: BillStatus.PAID,
-        ...(startDate && endDate
-          ? {
+    // Run aggregates in parallel
+    const [earnings, debts] = await Promise.all([
+      // Total earnings (PAID)
+      this.prisma.bill.aggregate({
+        _sum: { total: true },
+        where: {
+          client: { userId },
+          status: BillStatus.PAID,
+          ...(startDate && endDate
+            ? {
               billDate: {
                 gte: startDate,
                 lte: endDate,
               },
             }
-          : {}),
-      },
-    }),
+            : {}),
+        },
+      }),
 
-    // Total debts (UNPAID + OVERDUE)
-    this.prisma.bill.aggregate({
-      _sum: { total: true },
-      where: {
-        client: { userId },
-        status: BillStatus.UNPAID,
-        ...(startDate && endDate
-          ? {
+      // Total debts (UNPAID + OVERDUE)
+      this.prisma.bill.aggregate({
+        _sum: { total: true },
+        where: {
+          client: { userId },
+          status: BillStatus.UNPAID,
+          ...(startDate && endDate
+            ? {
               billDate: {
                 gte: startDate,
                 lte: endDate,
               },
             }
-          : {}),
-      },
-    }),
-  ]);
+            : {}),
+        },
+      }),
+    ]);
 
-  // Return results
-  return {
-    earnings: earnings._sum.total || 0,
-    debts: debts._sum.total || 0,
-  };
-}
+    // Return results
+    return {
+      earnings: earnings._sum.total || 0,
+      debts: debts._sum.total || 0,
+    };
+  }
 
 
   async remove(id: string) {

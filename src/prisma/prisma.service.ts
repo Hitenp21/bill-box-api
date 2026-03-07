@@ -16,7 +16,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     }
 
     // Create a PostgreSQL connection pool
-    const pool = new Pool({ connectionString });
+    const pool = new Pool({
+      connectionString,
+      max: 20, // default is 10
+      connectionTimeoutMillis: 10000, // 10 seconds
+    });
 
     // Create the Prisma adapter
     const adapter = new PrismaPg(pool);
