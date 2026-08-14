@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { apiReference } from '@scalar/nestjs-api-reference';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -50,13 +49,21 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, options);
 
-  // Correct usage of @scalar/nestjs-api-reference
-  app.use(
-    '/docs',
-    apiReference({
-      content: document,
-    }),
-  );
+  // Try to load optional @scalar/nestjs-api-reference dynamically to avoid
+  // serverless ESM require issues on platforms like Vercel. If it fails,
+  // fall back to plain Swagger UI.
+  try {
+    // dynamic import returns a namespace; prefer named export `apiReference`
+    const mod = await import('@scalar/nestjs-api-reference');
+    const apiReference = (mod && (mod.apiReference || mod.default)) as any;
+    if (apiReference) {
+      app.use('/docs', apiReference({ content: document }));
+    } else {
+      console.warn('@scalar/nestjs-api-reference loaded but no export found');
+    }
+  } catch (err) {
+    console.warn('@scalar/nestjs-api-reference not available or failed to load:', err?.message || err);
+  }
   SwaggerModule.setup('swagger', app, document);
 
   // Get the port number from the configuration
