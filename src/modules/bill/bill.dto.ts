@@ -79,6 +79,11 @@ export class CreateBillDto {
   @IsOptional()
   notes?: string;
 
+  @ApiPropertyOptional({ example: 15, description: 'Other charges applied to the bill', default: 0 })
+  @IsNumber()
+  @IsOptional()
+  other?: number;
+
   @ApiPropertyOptional({
     example: false,
     description: 'Flag to mark this as a sample bill',
@@ -123,6 +128,11 @@ export class UpdateBillDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @ApiPropertyOptional({ example: 15, description: 'Other charges applied to the bill' })
+  @IsNumber()
+  @IsOptional()
+  other?: number;
 
   @ApiPropertyOptional({
     example: false,

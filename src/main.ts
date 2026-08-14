@@ -12,24 +12,24 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   // Configure CORS
-  const frontendUrl = "http://10.244.0.174:8080";
+  const frontendUrl = "https://bill-box-api.vercel.app";
   app.enableCors({
-    // origin: frontendUrl || true, // Use FRONTEND_URL from env or allow all origins
-    // credentials: true,
-    // methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    // allowedHeaders: [
-    //   'Content-Type',
-    //   'Authorization',
-    //   'Accept',
-    //   'Origin',
-    //   'X-Requested-With',
-    //   'Access-Control-Allow-Origin',
-    //   'Access-Control-Allow-Headers',
-    //   'Access-Control-Allow-Methods',
-    // ],
-    // exposedHeaders: ['Authorization'],
-    // preflightContinue: false,
-    // optionsSuccessStatus: 204,
+    origin: frontendUrl || true, // Use FRONTEND_URL from env or allow all origins
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+      'Access-Control-Allow-Origin',
+      'Access-Control-Allow-Headers',
+      'Access-Control-Allow-Methods',
+    ],
+    exposedHeaders: ['Authorization'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
@@ -44,12 +44,12 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
 
   // Correct usage of @scalar/nestjs-api-reference
-  // app.use(
-  //   '/docs',
-  //   apiReference({
-  //     content: document,
-  //   }),
-  // );
+  app.use(
+    '/docs',
+    apiReference({
+      content: document,
+    }),
+  );
   SwaggerModule.setup('swagger', app, document);
 
   // Get the port number from the configuration

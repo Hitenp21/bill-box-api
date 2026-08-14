@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "bills" ADD COLUMN     "other" DOUBLE PRECISION NOT NULL DEFAULT 0;

@@ -46,6 +46,13 @@ export class Bill {
   })
   notes?: string;
 
+  @ApiPropertyOptional({
+    example: 15,
+    description: 'Other charges applied to the bill',
+    default: 0,
+  })
+  other?: number;
+
   @ApiProperty({
     example: false,
     description: 'Flag indicating if this is a sample bill',
