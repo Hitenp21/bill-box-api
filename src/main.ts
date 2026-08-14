@@ -12,7 +12,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   // Configure CORS
-  const frontendUrl = "https://bill-box-api.vercel.app";
+  const frontendUrl = "https://sales-summit-io.vercel.app";
   app.enableCors({
     origin: frontendUrl || true, // Use FRONTEND_URL from env or allow all origins
     credentials: true,
