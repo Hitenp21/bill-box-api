@@ -12,9 +12,19 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   // Configure CORS
-  const frontendUrl = "https://sales-summit-io.vercel.app";
+  // Load allowed origins from environment (comma-separated) or use sensible defaults
+  const envOrigins = configService.get<string>('FRONTEND_URLS') || configService.get<string>('FRONTEND_URL');
+  const allowedOrigins = envOrigins
+    ? envOrigins.split(',').map((s) => s.trim())
+    : ['https://sales-summit-io.vercel.app', 'http://10.108.199.175:8080'];
+
   app.enableCors({
-    origin: frontendUrl || true, // Use FRONTEND_URL from env or allow all origins
+    origin: (origin, callback) => {
+      // allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error('Origin not allowed by CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
@@ -23,9 +33,6 @@ async function bootstrap() {
       'Accept',
       'Origin',
       'X-Requested-With',
-      'Access-Control-Allow-Origin',
-      'Access-Control-Allow-Headers',
-      'Access-Control-Allow-Methods',
     ],
     exposedHeaders: ['Authorization'],
     preflightContinue: false,

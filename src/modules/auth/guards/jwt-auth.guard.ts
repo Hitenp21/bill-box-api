@@ -35,7 +35,11 @@ export class JwtUserAuthGuard extends AuthGuard("authUser") {
       throw err;
     }
 
-    // If there's no error/info, return the validated user object
+    // If there's no error/info but also no user (e.g., no token provided), treat as unauthorized
+    if (!user) {
+      throw new UnauthorizedException('No authentication token provided');
+    }
+
     return user;
   }
 }
